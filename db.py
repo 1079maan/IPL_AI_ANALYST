@@ -13,6 +13,35 @@ import pandas as pd
 import streamlit as st
 from typing import Optional, Tuple
 
+
+def _get_db_config() -> dict:
+    """
+    Load DB credentials from st.secrets (Streamlit Cloud)
+    or fall back to environment variables / hardcoded values.
+    """
+    # ── Priority 1: st.secrets (Streamlit Cloud) ──────────────────────────────
+    try:
+        secrets = st.secrets["postgres"]
+        return {
+            "host":     secrets["db.qxgxodpethnqmwheyepq.supabase.co"],
+            "port":     int(secrets.get("port", 5432)),
+            "dbname":   secrets["postgres"],
+            "user":     secrets["postgres"],
+            "password": secrets["Vaishnani@2728"],
+        }
+    except (KeyError, FileNotFoundError):
+        pass
+
+    # ── Priority 2: Environment variables ─────────────────────────────────────
+    return {
+        "host":     os.getenv("PG_HOST",     "localhost"),
+        "port":     int(os.getenv("PG_PORT", "5432")),
+        "dbname":   os.getenv("PG_DB",       "IPL_Data"),
+        "user":     os.getenv("PG_USER",     "postgres"),
+        "password": os.getenv("PG_PASSWORD", "Maan@2004"),
+    }
+
+
 # ── Database credentials ───────────────────────────────────────────────────────
 # ⚠️  Update password below if you change it in pgAdmin
 DB_CONFIG = {
