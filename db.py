@@ -1,9 +1,9 @@
 """
-db.py — PostgreSQL connection + query execution for IPL NEXUS
-Uses psycopg2 ThreadedConnectionPool for performance on large ball-by-ball datasets.
+db.py — PostgreSQL connection for IPL NEXUS
 
-⚠️  Credentials are embedded below. After changing your DB password,
-    update line 21 (password field) with your new password.
+Credential priority:
+  1. st.secrets  → Streamlit Cloud (production)
+  2. os.getenv() → local environment variables
 """
 
 import os
@@ -17,75 +17,60 @@ from typing import Optional, Tuple
 def _get_db_config() -> dict:
     """
     Load DB credentials from st.secrets (Streamlit Cloud)
-    or fall back to environment variables / hardcoded values.
+    or fall back to environment variables.
     """
     # ── Priority 1: st.secrets (Streamlit Cloud) ──────────────────────────────
     try:
         secrets = st.secrets["postgres"]
         return {
-            "host":     secrets["db.qxgxodpethnqmwheyepq.supabase.co"],
+            "host":     secrets["host"],
             "port":     int(secrets.get("port", 5432)),
-            "dbname":   secrets["postgres"],
-            "user":     secrets["postgres"],
-            "password": secrets["Vaishnani@2728"],
+            "dbname":   secrets["dbname"],
+            "user":     secrets["user"],
+            "password": secrets["password"],
         }
     except (KeyError, FileNotFoundError):
         pass
 
-    # ── Priority 2: Environment variables ─────────────────────────────────────
+    # ── Priority 2: Environment variables (local fallback) ────────────────────
     return {
-        "host":     os.getenv("PG_HOST",     "localhost"),
+        "host":     os.getenv("PG_HOST",     "db.qxgxodpethnqmwheyepq.supabase.co"),
         "port":     int(os.getenv("PG_PORT", "5432")),
-        "dbname":   os.getenv("PG_DB",       "IPL_Data"),
+        "dbname":   os.getenv("PG_DB",       "postgres"),
         "user":     os.getenv("PG_USER",     "postgres"),
-        "password": os.getenv("PG_PASSWORD", "Maan@2004"),
+        "password": os.getenv("PG_PASSWORD", "Vaishnani@2728"),
     }
 
 
-# ── Database credentials ───────────────────────────────────────────────────────
-# ⚠️  Update password below if you change it in pgAdmin
-DB_CONFIG = {
-    "host":     os.getenv("PG_HOST",     "localhost"),
-    "port":     int(os.getenv("PG_PORT", "5432")),
-    "dbname":   os.getenv("PG_DB",       "IPL_Data"),
-    "user":     os.getenv("PG_USER",     "postgres"),
-    "password": os.getenv("PG_PASSWORD", "Maan@2004"),
-}
-
-# ── Connection pool (cached once per Streamlit session) ───────────────────────
+# ── Connection pool ────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
 def get_pool():
     """
-    Create a thread-safe PostgreSQL connection pool.
-    min 1 connection, max 5 connections — suitable for Streamlit's threading model.
+    Thread-safe PostgreSQL connection pool.
+    Cached once per session — no reconnect overhead.
     """
     try:
         pool = psycopg2.pool.ThreadedConnectionPool(
             minconn=1,
             maxconn=5,
             connect_timeout=10,
-            **DB_CONFIG,
+            **_get_db_config(),       # ✅ uses correct function
         )
         return pool
-    except psycopg2.OperationalError as e:
-        return None   # handled gracefully in run_query()
+    except psycopg2.OperationalError:
+        return None
 
 
-def run_query(sql: str) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
+def run_query(sql: str) -> tuple[Optional[pd.DataFrame], Optional[str]]:
     """
     Execute a SQL SELECT query and return (DataFrame, error_string).
-    Exactly one of the two return values will be None.
-
-    Performance optimisations for 250K+ ball-by-ball rows:
-      • Reuses pooled connections — no reconnect overhead per query
-      • fetchmany(10_000) caps memory usage — SQL should always use LIMIT
-      • pd.to_numeric(errors='ignore') keeps number columns numeric for charting
+    Exactly one of the two will always be None.
     """
     pool = get_pool()
     if pool is None:
         return None, (
-            "❌ Cannot connect to PostgreSQL. "
-            "Check your credentials in db.py (host / dbname / user / password)."
+            "Cannot connect to PostgreSQL. "
+            "Check your credentials in Streamlit Secrets."
         )
 
     conn = None
@@ -94,11 +79,10 @@ def run_query(sql: str) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
         with conn.cursor() as cur:
             cur.execute(sql)
             if cur.description is None:
-                return pd.DataFrame(), None         # query returned no rows
+                return pd.DataFrame(), None
             cols = [desc[0] for desc in cur.description]
-            rows = cur.fetchmany(10_000)             # safety cap
+            rows = cur.fetchmany(10_000)
             df   = pd.DataFrame(rows, columns=cols)
-            # Coerce numeric-looking columns so charts work correctly
             for col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="ignore")
             return df, None
@@ -112,14 +96,14 @@ def run_query(sql: str) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
 
 
 def test_connection() -> bool:
-    """Quick ping — used by the 'Test DB Connection' button in the sidebar."""
+    """Quick ping — used by Test DB Connection button."""
     df, err = run_query("SELECT 1 AS ok")
     return err is None
 
 
-# ── Schema context (sent to Groq LLM so it understands the DB structure) ──────
+# ── Schema context sent to Groq LLM ───────────────────────────────────────────
 SCHEMA_CONTEXT = """
-PostgreSQL database: IPL_Data
+PostgreSQL database: postgres (Supabase)
 Tables and columns:
 
 matches(
@@ -156,4 +140,9 @@ Key relationships:
 - deliveries.match_id      → matches.match_id
 - innings.match_id         → matches.match_id
 - player_teams.player_id   → players.player_id
+
+CRITICAL DATA FACTS:
+- is_wicket stores 't' or 'f' (STRING) — use WHERE is_wicket = 't'
+- over_number range is 1 to 20 (NOT 0 to 19)
+- player_of_match format is {"Name"} — clean with REPLACE()
 """
