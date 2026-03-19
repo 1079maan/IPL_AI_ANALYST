@@ -18,6 +18,7 @@ def _get_db_config() -> dict:
     """
     Load DB credentials from st.secrets (Streamlit Cloud)
     or fall back to environment variables.
+    Uses Session Pooler for Streamlit Cloud compatibility.
     """
     # ── Priority 1: st.secrets (Streamlit Cloud) ──────────────────────────────
     try:
@@ -28,19 +29,19 @@ def _get_db_config() -> dict:
             "dbname":   secrets["dbname"],
             "user":     secrets["user"],
             "password": secrets["password"],
-            "sslmode":  "require",   # ← required for Supabase
+            "sslmode":  "require",
         }
     except (KeyError, FileNotFoundError):
         pass
 
-    # ── Priority 2: Environment variables (local fallback) ────────────────────
+    # ── Priority 2: Session Pooler fallback ───────────────────────────────────
     return {
-        "host":     os.getenv("PG_HOST",     "db.qxgxodpethnqmwheyepq.supabase.co"),
+        "host":     os.getenv("PG_HOST",     "aws-1-ap-south-1.pooler.supabase.com"),
         "port":     int(os.getenv("PG_PORT", "5432")),
         "dbname":   os.getenv("PG_DB",       "postgres"),
-        "user":     os.getenv("PG_USER",     "postgres"),
+        "user":     os.getenv("PG_USER",     "postgres.qxgxodpethnqmwheyepq"),
         "password": os.getenv("PG_PASSWORD", "Vaishnani@2728"),
-        "sslmode":  "require",       # ← required for Supabase
+        "sslmode":  "require",
     }
 
 
