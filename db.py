@@ -109,7 +109,7 @@ SCHEMA_CONTEXT = """
 PostgreSQL database: postgres (Supabase)
 Tables and columns:
 
-Matches(
+matches(
     match_id, season, match_date, match_city, match_venue,
     toss_winner, toss_decision, match_type,
     team1, team2, player_of_match, balls_per_over, overs,
@@ -132,7 +132,7 @@ deliveries(
     is_wicket, dismissal_type, player_out_id
 )
 
-Players(player_id, player_name, registry_id)
+players(player_id, player_name, registry_id)
 
 player_teams(player_id, team_name, season)
 
