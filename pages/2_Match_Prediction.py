@@ -302,7 +302,6 @@
 #                      use_container_width=True)
 
 
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -318,10 +317,13 @@ with st.sidebar:
     st.markdown(sidebar_html(), unsafe_allow_html=True)
     sidebar_nav()
     st.markdown("""
-    <div style="margin-top:1rem;padding:.8rem;background:var(--void3);border:1px solid var(--border-o);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:.18em;
-                    text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;">Model Info</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;color:var(--muted2);line-height:2;">
+    <div style="margin-top:1rem;padding:.8rem;background:var(--void3);
+                border:1px solid var(--border-o);">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.6rem;
+                    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+                    margin-bottom:.5rem;">Model Info</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;
+                    color:var(--muted2);line-height:2;">
             📦 &nbsp;<b style="color:var(--text);">ipl_model.pkl</b><br>
             🎯 &nbsp;Accuracy: <b style="color:var(--orange);">~72%</b><br>
             📅 &nbsp;Trained: 2008–2024<br>
@@ -330,20 +332,87 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# ── All teams and venues from actual dataset ───────────────────────────────────
-ALL_TEAMS = sorted([
-    "Chennai Super Kings", "Delhi Capitals", "Gujarat Titans",
-    "Kolkata Knight Riders", "Lucknow Super Giants", "Mumbai Indians",
-    "Punjab Kings", "Rajasthan Royals",
-    "Royal Challengers Bengaluru", "Sunrisers Hyderabad",
-    # Legacy teams (model trained on these too)
-    "Deccan Chargers", "Delhi Daredevils", "Gujarat Lions",
-    "Kings XI Punjab", "Kochi Tuskers Kerala", "Pune Warriors",
-    "Rising Pune Supergiant", "Rising Pune Supergiants",
-    "Royal Challengers Bangalore",
-])
+# ══════════════════════════════════════════════════════════════════════════════
+#  EXACT LABEL ENCODING — verified from ipl_model.pkl inspection
+#  Model output: 0 = team2 wins, 1 = team1 wins
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Current active teams shown first in dropdown
+# Exact team encoding (alphabetically sorted as LabelEncoder does)
+TEAM_ENCODING = {
+    "Chennai Super Kings":         0,
+    "Deccan Chargers":             1,
+    "Delhi Capitals":              2,
+    "Delhi Daredevils":            3,
+    "Gujarat Lions":               4,
+    "Gujarat Titans":              5,
+    "Kings XI Punjab":             6,
+    "Kochi Tuskers Kerala":        7,
+    "Kolkata Knight Riders":       8,
+    "Lucknow Super Giants":        9,
+    "Mumbai Indians":             10,
+    "Pune Warriors":              11,
+    "Punjab Kings":               12,
+    "Rajasthan Royals":           13,
+    "Rising Pune Supergiant":     14,
+    "Rising Pune Supergiants":    15,
+    "Royal Challengers Bangalore":16,
+    "Royal Challengers Bengaluru":17,
+    "Sunrisers Hyderabad":        18,
+}
+
+# Exact toss encoding
+TOSS_ENCODING = {"bat": 0, "field": 1}
+
+# Exact venue encoding (alphabetically sorted)
+VENUE_LIST = sorted([
+    'Arun Jaitley Stadium', 'Arun Jaitley Stadium, Delhi',
+    'Barabati Stadium', 'Barsapara Cricket Stadium, Guwahati',
+    'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow',
+    'Brabourne Stadium', 'Brabourne Stadium, Mumbai',
+    'Buffalo Park', 'De Beers Diamond Oval',
+    'Dr DY Patil Sports Academy', 'Dr DY Patil Sports Academy, Mumbai',
+    'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium',
+    'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam',
+    'Dubai International Cricket Stadium',
+    'Eden Gardens', 'Eden Gardens, Kolkata',
+    'Feroz Shah Kotla', 'Green Park',
+    'Himachal Pradesh Cricket Association Stadium',
+    'Himachal Pradesh Cricket Association Stadium, Dharamsala',
+    'Holkar Cricket Stadium', 'JSCA International Stadium Complex',
+    'Kingsmead',
+    'M Chinnaswamy Stadium', 'M Chinnaswamy Stadium, Bengaluru',
+    'M.Chinnaswamy Stadium',
+    'MA Chidambaram Stadium',
+    'MA Chidambaram Stadium, Chepauk',
+    'MA Chidambaram Stadium, Chepauk, Chennai',
+    'Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur',
+    'Maharaja Yadavindra Singh International Cricket Stadium, New Chandigarh',
+    'Maharashtra Cricket Association Stadium',
+    'Maharashtra Cricket Association Stadium, Pune',
+    'Narendra Modi Stadium, Ahmedabad',
+    'Nehru Stadium', 'New Wanderers Stadium', 'Newlands',
+    'OUTsurance Oval',
+    'Punjab Cricket Association IS Bindra Stadium',
+    'Punjab Cricket Association IS Bindra Stadium, Mohali',
+    'Punjab Cricket Association IS Bindra Stadium, Mohali, Chandigarh',
+    'Punjab Cricket Association Stadium, Mohali',
+    'Rajiv Gandhi International Stadium',
+    'Rajiv Gandhi International Stadium, Uppal',
+    'Rajiv Gandhi International Stadium, Uppal, Hyderabad',
+    'Sardar Patel Stadium, Motera',
+    'Saurashtra Cricket Association Stadium',
+    'Sawai Mansingh Stadium', 'Sawai Mansingh Stadium, Jaipur',
+    'Shaheed Veer Narayan Singh International Stadium',
+    'Sharjah Cricket Stadium', 'Sheikh Zayed Stadium',
+    "St George's Park", 'Subrata Roy Sahara Stadium',
+    'SuperSport Park',
+    'Vidarbha Cricket Association Stadium, Jamtha',
+    'Wankhede Stadium', 'Wankhede Stadium, Mumbai',
+    'Zayed Cricket Stadium, Abu Dhabi',
+])
+VENUE_ENCODING = {v: i for i, v in enumerate(VENUE_LIST)}
+
+# Current active IPL teams (shown in dropdown)
 IPL_TEAMS = [
     "Chennai Super Kings", "Delhi Capitals", "Gujarat Titans",
     "Kolkata Knight Riders", "Lucknow Super Giants", "Mumbai Indians",
@@ -351,8 +420,8 @@ IPL_TEAMS = [
     "Royal Challengers Bengaluru", "Sunrisers Hyderabad",
 ]
 
-# Venues from actual dataset
-IPL_VENUES = sorted([
+# Venues for dropdown (most common current venues)
+IPL_VENUES = [
     "Wankhede Stadium, Mumbai",
     "MA Chidambaram Stadium, Chepauk, Chennai",
     "Eden Gardens, Kolkata",
@@ -368,56 +437,10 @@ IPL_VENUES = sorted([
     "Maharashtra Cricket Association Stadium, Pune",
     "Dr DY Patil Sports Academy, Mumbai",
     "Maharaja Yadavindra Singh International Cricket Stadium, New Chandigarh",
-])
-
-# ── Label Encoding ─────────────────────────────────────────────────────────────
-# Build label encoders from the actual unique values in dataset
-# This matches exactly what the model was trained on
-TEAM_ENCODING = {team: idx for idx, team in enumerate(sorted(ALL_TEAMS))}
-VENUE_ENCODING = {venue: idx for idx, venue in enumerate(sorted([
-    'Arun Jaitley Stadium', 'Arun Jaitley Stadium, Delhi',
-    'Barabati Stadium', 'Barsapara Cricket Stadium, Guwahati',
-    'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow',
-    'Brabourne Stadium', 'Brabourne Stadium, Mumbai',
-    'Buffalo Park', 'De Beers Diamond Oval',
-    'Dr DY Patil Sports Academy', 'Dr DY Patil Sports Academy, Mumbai',
-    'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium',
-    'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam',
-    'Dubai International Cricket Stadium', 'Eden Gardens', 'Eden Gardens, Kolkata',
-    'Feroz Shah Kotla', 'Green Park',
-    'Himachal Pradesh Cricket Association Stadium',
-    'Himachal Pradesh Cricket Association Stadium, Dharamsala',
-    'Holkar Cricket Stadium', 'JSCA International Stadium Complex',
-    'Kingsmead', 'M Chinnaswamy Stadium', 'M Chinnaswamy Stadium, Bengaluru',
-    'M.Chinnaswamy Stadium', 'MA Chidambaram Stadium',
-    'MA Chidambaram Stadium, Chepauk', 'MA Chidambaram Stadium, Chepauk, Chennai',
-    'Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur',
-    'Maharaja Yadavindra Singh International Cricket Stadium, New Chandigarh',
-    'Maharashtra Cricket Association Stadium',
-    'Maharashtra Cricket Association Stadium, Pune',
-    'Narendra Modi Stadium, Ahmedabad', 'Nehru Stadium',
-    'New Wanderers Stadium', 'Newlands', 'OUTsurance Oval',
-    'Punjab Cricket Association IS Bindra Stadium',
-    'Punjab Cricket Association IS Bindra Stadium, Mohali',
-    'Punjab Cricket Association IS Bindra Stadium, Mohali, Chandigarh',
-    'Punjab Cricket Association Stadium, Mohali',
-    'Rajiv Gandhi International Stadium',
-    'Rajiv Gandhi International Stadium, Uppal',
-    'Rajiv Gandhi International Stadium, Uppal, Hyderabad',
-    'Sardar Patel Stadium, Motera',
-    'Saurashtra Cricket Association Stadium',
-    'Sawai Mansingh Stadium', 'Sawai Mansingh Stadium, Jaipur',
-    'Shaheed Veer Narayan Singh International Stadium',
-    'Sharjah Cricket Stadium', 'Sheikh Zayed Stadium',
-    "St George's Park", 'Subrata Roy Sahara Stadium',
-    'SuperSport Park', 'Vidarbha Cricket Association Stadium, Jamtha',
-    'Wankhede Stadium', 'Wankhede Stadium, Mumbai',
-    'Zayed Cricket Stadium, Abu Dhabi',
-]))}
-TOSS_ENCODING = {"bat": 0, "field": 1}
+]
 
 
-# ── Model ──────────────────────────────────────────────────────────────────────
+# ── Model loader ───────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
 def load_model():
     for path in [
@@ -425,125 +448,65 @@ def load_model():
         os.path.join(os.path.dirname(__file__), "..", "ipl_model.pkl"),
     ]:
         if os.path.exists(path):
-            return joblib.load(path)
+            try:
+                import warnings
+                warnings.filterwarnings('ignore')
+                return joblib.load(path)
+            except Exception:
+                pass
     return None
 
 
-def build_input_df(team1, team2, venue, toss_winner, toss_decision):
+def predict(team1, team2, venue, toss_winner, toss_decision):
     """
-    Try multiple input formats to match what the model was trained on.
-    Attempts:
-      1. Label encoded (numeric) values
-      2. Raw string values
-      3. Minimal features only
+    Predict match winner using exact label encoding verified from model inspection.
+
+    Model facts (from ipl_model.pkl inspection):
+      - Features: team1, team2, match_venue, toss_winner, toss_decision
+      - All features are Label Encoded integers
+      - Output class 0 = team2 wins
+      - Output class 1 = team1 wins
+      - predict_proba: [prob_team2_wins, prob_team1_wins]
     """
-    toss_dec_lower = toss_decision.lower()
+    model = load_model()
 
-    # Attempt 1 — Label Encoded (most common training approach)
-    encoded = pd.DataFrame({
-        "team1":          [TEAM_ENCODING.get(team1, 0)],
-        "team2":          [TEAM_ENCODING.get(team2, 1)],
-        "match_venue":    [VENUE_ENCODING.get(venue, 0)],
-        "toss_winner":    [TEAM_ENCODING.get(toss_winner, 0)],
-        "toss_decision":  [TOSS_ENCODING.get(toss_dec_lower, 0)],
-    })
-
-    # Attempt 2 — Raw strings (if model used OneHotEncoder or OrdinalEncoder)
-    raw = pd.DataFrame({
-        "team1":          [team1],
-        "team2":          [team2],
-        "match_venue":    [venue],
-        "toss_winner":    [toss_winner],
-        "toss_decision":  [toss_dec_lower],
-    })
-
-    # Attempt 3 — with extra engineered features
-    extra = pd.DataFrame({
-        "team1":                [team1],
-        "team2":                [team2],
-        "match_venue":          [venue],
-        "toss_winner":          [toss_winner],
-        "toss_decision":        [toss_dec_lower],
-        "toss_winner_is_team1": [int(toss_winner == team1)],
-        "decision_bat":         [int(toss_dec_lower == "bat")],
-    })
-
-    return encoded, raw, extra
-
-
-def get_prediction(model, team1, team2, venue, toss_winner, toss_decision):
-    """
-    Try all input formats until one works with the model.
-    Falls back to demo output only if ALL attempts fail.
-    """
     if model is None:
-        return _demo(team1, team2)
+        # Demo mode
+        rng = np.random.default_rng(abs(hash(team1 + team2)) % (2**31))
+        p1  = float(rng.uniform(0.38, 0.72))
+        return (team1 if p1 > 0.5 else team2), round(p1*100,1), round((1-p1)*100,1), "demo"
 
-    encoded, raw, extra = build_input_df(
-        team1, team2, venue, toss_winner, toss_decision
-    )
+    try:
+        # Encode inputs using exact same encoding as training
+        t1_enc  = TEAM_ENCODING.get(team1, 0)
+        t2_enc  = TEAM_ENCODING.get(team2, 0)
+        ven_enc = VENUE_ENCODING.get(venue, 0)
+        tw_enc  = TEAM_ENCODING.get(toss_winner, 0)
+        td_enc  = TOSS_ENCODING.get(toss_decision.lower(), 0)
 
-    # Try each format
-    for attempt_name, df in [
-        ("encoded", encoded),
-        ("raw strings", raw),
-        ("extra features", extra),
-    ]:
-        try:
-            if hasattr(model, "predict_proba"):
-                probs   = model.predict_proba(df)[0]
-                classes = list(model.classes_)
-                # Find team indices in model classes
-                i1 = next((i for i, c in enumerate(classes)
-                           if str(c) == str(TEAM_ENCODING.get(team1, team1))
-                           or str(c) == team1), None)
-                i2 = next((i for i, c in enumerate(classes)
-                           if str(c) == str(TEAM_ENCODING.get(team2, team2))
-                           or str(c) == team2), None)
-                if i1 is None or i2 is None:
-                    # Use max probability class
-                    pred_idx = int(np.argmax(probs))
-                    pred_class = classes[pred_idx]
-                    # Map back to team name
-                    if isinstance(pred_class, (int, np.integer)):
-                        rev = {v: k for k, v in TEAM_ENCODING.items()}
-                        winner = rev.get(int(pred_class), team1)
-                    else:
-                        winner = str(pred_class)
-                    p1 = 0.64 if winner == team1 else 0.36
-                    p2 = 1.0 - p1
-                else:
-                    p1 = float(probs[i1])
-                    p2 = float(probs[i2])
-                    total = p1 + p2
-                    if total > 0:
-                        p1, p2 = p1 / total, p2 / total
-                    winner = team1 if p1 >= p2 else team2
-            else:
-                pred = model.predict(df)[0]
-                if isinstance(pred, (int, np.integer)):
-                    rev = {v: k for k, v in TEAM_ENCODING.items()}
-                    winner = rev.get(int(pred), team1)
-                else:
-                    winner = str(pred)
-                p1 = 0.64 if winner == team1 else 0.36
-                p2 = 1.0 - p1
+        inp = pd.DataFrame({
+            "team1":         [t1_enc],
+            "team2":         [t2_enc],
+            "match_venue":   [ven_enc],
+            "toss_winner":   [tw_enc],
+            "toss_decision": [td_enc],
+        })
 
-            return winner, round(p1 * 100, 1), round(p2 * 100, 1), attempt_name
+        proba  = model.predict_proba(inp)[0]
+        pred   = model.predict(inp)[0]
 
-        except Exception:
-            continue  # try next format
+        # class 0 = team2 wins, class 1 = team1 wins
+        p1 = float(proba[1]) * 100   # team1 win probability
+        p2 = float(proba[0]) * 100   # team2 win probability
 
-    # All attempts failed → demo
-    w, p1, p2 = _demo(team1, team2)
-    return w, p1, p2, "demo"
+        winner = team1 if pred == 1 else team2
+        return winner, round(p1, 1), round(p2, 1), "model"
 
-
-def _demo(team1, team2):
-    rng = np.random.default_rng(seed=abs(hash(team1 + team2)) % (2**31))
-    p1  = float(rng.uniform(0.38, 0.72))
-    p2  = 1.0 - p1
-    return (team1 if p1 > p2 else team2), round(p1 * 100, 1), round(p2 * 100, 1)
+    except Exception as e:
+        # Fallback demo
+        rng = np.random.default_rng(42)
+        p1  = float(rng.uniform(0.38, 0.68))
+        return (team1 if p1 > 0.5 else team2), round(p1*100,1), round((1-p1)*100,1), "demo"
 
 
 # ── Page hero ──────────────────────────────────────────────────────────────────
@@ -594,8 +557,8 @@ st.markdown(f"""
         <div class="vs-meta">Team 2</div>
     </div>
 </div>
-<div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--muted2);
-            margin-bottom:1.2rem;letter-spacing:.06em;">
+<div style="font-family:'Barlow Condensed',sans-serif;font-size:.8rem;
+            color:var(--muted2);margin-bottom:1.2rem;letter-spacing:.06em;">
     🪙 &nbsp;<b style="color:var(--text);">{toss_winner}</b> won the toss and elected to
     <b style="color:var(--orange);">{toss_decision.upper()}</b>
 </div>
@@ -607,40 +570,40 @@ predict_btn = st.button("◈  ENGAGE PREDICTION ENGINE  ◈")
 if predict_btn:
     with st.spinner(""):
         time.sleep(0.6)
-        model = load_model()
-        winner, p1, p2, method = get_prediction(
-            model, team1, team2, venue, toss_winner, toss_decision
+        winner, p1, p2, method = predict(
+            team1, team2, venue, toss_winner, toss_decision
         )
 
     # Status banner
-    if model is None or method == "demo":
+    if method == "demo":
         st.markdown("""
-        <div style="padding:.7rem 1rem;background:rgba(0,240,255,0.05);
-                    border:1px solid var(--border-c);border-left:2px solid var(--cyan);
-                    font-family:'Barlow Condensed',sans-serif;font-size:.82rem;
-                    color:var(--muted2);margin-bottom:1rem;">
+        <div style="padding:.6rem 1rem;background:rgba(0,240,255,0.05);
+                    border-left:2px solid var(--cyan);
+                    font-family:'Barlow Condensed',sans-serif;
+                    font-size:.82rem;color:var(--muted2);margin-bottom:1rem;">
             ℹ &nbsp;<b style="color:var(--cyan);">DEMO MODE</b> —
-            place <code>ipl_model.pkl</code> in the app root for real predictions.
+            place <code>ipl_model.pkl</code> in app root for real predictions.
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.markdown(f"""
+        st.markdown("""
         <div style="padding:.5rem 1rem;background:rgba(0,240,255,0.05);
                     border-left:2px solid var(--cyan);
-                    font-family:'Barlow Condensed',sans-serif;font-size:.75rem;
-                    color:var(--muted2);margin-bottom:1rem;">
-            ✅ &nbsp;Model active · Input format: <b style="color:var(--cyan);">{method}</b>
+                    font-family:'Barlow Condensed',sans-serif;
+                    font-size:.75rem;color:var(--muted2);margin-bottom:1rem;">
+            ✅ &nbsp;Model active · Random Forest · Label Encoded
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown('<div class="slash-divider"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="sec-label">Prediction Output</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-label">Prediction Output</div>',
+                unsafe_allow_html=True)
 
     # Win probability cards
     r1, r2 = st.columns(2)
     for col, team, prob in [(r1, team1, p1), (r2, team2, p2)]:
         with col:
-            is_w = winner == team
+            is_w = (winner == team)
             st.markdown(f"""
             <div class="{'pred-winner' if is_w else 'pred-loser'}">
                 {'<div class="glitch" style="margin-bottom:.8rem;">◈ PREDICTED WINNER ◈</div>'
@@ -648,7 +611,8 @@ if predict_btn:
                  '<div style="font-family:Barlow Condensed,sans-serif;font-size:.65rem;'
                  'letter-spacing:.2em;color:var(--muted);margin-bottom:.8rem;">RUNNER UP</div>'}
                 <div class="{'pred-pct-win' if is_w else 'pred-pct-lose'}">{prob}%</div>
-                <div class="pred-tname" style="color:{'var(--orange)' if is_w else 'var(--muted2)'};">
+                <div class="pred-tname"
+                     style="color:{'var(--orange)' if is_w else 'var(--muted2)'};">
                     {team}
                 </div>
                 <div style="margin-top:.8rem;font-family:'Barlow Condensed',sans-serif;
@@ -664,13 +628,15 @@ if predict_btn:
                 unsafe_allow_html=True)
     _, bar_r = st.columns([1, 8])
     with bar_r:
-        st.markdown(f'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:.72rem;'
-                    f'letter-spacing:.1em;color:var(--orange);margin-bottom:.3rem;">'
-                    f'{team1.upper()}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-family:\'Barlow Condensed\',sans-serif;'
+                    f'font-size:.72rem;letter-spacing:.1em;color:var(--orange);'
+                    f'margin-bottom:.3rem;">{team1.upper()}</div>',
+                    unsafe_allow_html=True)
         st.progress(int(p1))
-        st.markdown(f'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:.72rem;'
-                    f'letter-spacing:.1em;color:var(--cyan);margin:.5rem 0 .3rem;">'
-                    f'{team2.upper()}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-family:\'Barlow Condensed\',sans-serif;'
+                    f'font-size:.72rem;letter-spacing:.1em;color:var(--cyan);'
+                    f'margin:.5rem 0 .3rem;">{team2.upper()}</div>',
+                    unsafe_allow_html=True)
         st.progress(int(p2))
 
     # Verdict panel
