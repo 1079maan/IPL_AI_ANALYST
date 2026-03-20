@@ -996,6 +996,23 @@ HOW TO SET YOUR GROQ API KEY:
     GROQ_API_KEY = "gsk_your_key_here"
 """
 
+"""
+sql_generator.py — Natural Language → SQL using Groq LLM
+
+HOW TO SET YOUR GROQ API KEY:
+
+  ── Streamlit Cloud (production) ──────────────────────────────
+  Go to: share.streamlit.io → Your App → Settings → Secrets
+  Add this line:
+
+    GROQ_API_KEY = "gsk_your_key_here"
+
+  ── Local development ──────────────────────────────────────────
+  Create .streamlit/secrets.toml in your project:
+
+    GROQ_API_KEY = "gsk_your_key_here"
+"""
+
 import os
 import re
 import json
@@ -1081,7 +1098,7 @@ RULES:
 - Always LIMIT 10 for ranking queries.
 - Always JOIN players table for player names.
 - Always alias computed columns clearly.
-- ALWAYS wrap table names in double quotes: "deliveries", "matches", "innings", "players", "player_teams"""
+- CRITICAL: Table names are case-sensitive. Use exactly: "Matches" (capital M), "Players" (capital P), deliveries, innings, player_teams (lowercase)"""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1265,7 +1282,7 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE runs_batter = 6)                        AS total_sixes,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE runs_batter = 6)
                       / NULLIF(COUNT(*), 0), 2)                                AS six_probability_pct
-            FROM "deliveries"
+            FROM deliveries
             WHERE over_number <= 2
             GROUP BY over_number
             ORDER BY over_number
@@ -1282,7 +1299,7 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE is_wicket = 't')              AS wickets,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE is_wicket = 't')
                       / NULLIF(COUNT(*), 0), 2)                      AS wicket_probability_pct
-            FROM "deliveries"
+            FROM deliveries
             WHERE over_number <= 6
             GROUP BY over_number
             ORDER BY over_number
@@ -1301,8 +1318,8 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE i.batting_team = m.winner)    AS wins,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE i.batting_team = m.winner)
                       / NULLIF(COUNT(*), 0), 1)                      AS win_pct
-            FROM "innings" i
-            JOIN "matches" m ON i.match_id = m.match_id
+            FROM innings i
+            JOIN "Matches" m ON i.match_id = m.match_id
             WHERE m.winner IS NOT NULL
               AND m.result != 'no result'
             GROUP BY i.innings_number
@@ -1319,8 +1336,8 @@ FALLBACK_QUERIES = {
                 ROUND(AVG(i.total_runs), 1)           AS avg_score,
                 COUNT(*)                              AS matches,
                 MAX(i.total_runs)                     AS highest_score
-            FROM "innings" i
-            JOIN "matches" m ON i.match_id = m.match_id
+            FROM innings i
+            JOIN "Matches" m ON i.match_id = m.match_id
             WHERE i.innings_number = 1
             GROUP BY m.match_venue
             HAVING COUNT(*) >= 5
@@ -1341,7 +1358,7 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE runs_batter = 4)              AS fours,
                 COUNT(*) FILTER (WHERE is_wicket = 't')              AS wickets,
                 ROUND(SUM(runs_total) * 6.0 / NULLIF(COUNT(*),0), 2) AS run_rate
-            FROM "deliveries"
+            FROM deliveries
             WHERE over_number >= 16
             GROUP BY over_number
             ORDER BY over_number
@@ -1360,7 +1377,7 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE runs_batter = 4)               AS fours,
                 COUNT(*) FILTER (WHERE is_wicket = 't')               AS wickets,
                 ROUND(SUM(runs_total) * 6.0 / NULLIF(COUNT(*), 0), 2) AS run_rate
-            FROM "deliveries"
+            FROM deliveries
             WHERE over_number <= 6
             GROUP BY over_number
             ORDER BY over_number
@@ -1377,7 +1394,7 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE runs_batter = 6)                 AS sixes,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE runs_batter = 6)
                       / NULLIF(COUNT(*), 0), 2)                         AS six_pct
-            FROM "deliveries"
+            FROM deliveries
             GROUP BY over_number
             ORDER BY over_number
         """,
@@ -1391,7 +1408,7 @@ FALLBACK_QUERIES = {
                 COUNT(*)          AS super_over_matches,
                 MIN(season)       AS first_season,
                 MAX(season)       AS last_season
-            FROM "matches"
+            FROM "Matches"
             WHERE eliminator IS NOT NULL
               AND eliminator != ''
         """,
@@ -1413,8 +1430,8 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE i.batting_team = m.winner)     AS wins,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE i.batting_team = m.winner)
                       / NULLIF(COUNT(*), 0), 1)                        AS win_pct
-            FROM "innings" i
-            JOIN "matches" m ON i.match_id = m.match_id
+            FROM innings i
+            JOIN "Matches" m ON i.match_id = m.match_id
             WHERE i.innings_number = 1
               AND m.winner IS NOT NULL
               AND m.result != 'no result'
@@ -1433,8 +1450,8 @@ FALLBACK_QUERIES = {
                 MAX(i.total_runs)              AS highest_score,
                 MIN(i.total_runs)              AS lowest_score,
                 COUNT(*)                       AS matches
-            FROM "innings" i
-            JOIN "matches" m ON i.match_id = m.match_id
+            FROM innings i
+            JOIN "Matches" m ON i.match_id = m.match_id
             WHERE i.innings_number = 1
             GROUP BY m.season
             ORDER BY m.season
@@ -1451,8 +1468,8 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE d.runs_total = 0)              AS dot_balls,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE d.runs_total = 0)
                       / NULLIF(COUNT(*), 0), 1)                        AS dot_ball_pct
-            FROM "deliveries" d
-            JOIN "players" p ON d.bowler_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.bowler_id = p.player_id
             GROUP BY p.player_name
             HAVING COUNT(*) >= 300
             ORDER BY dot_ball_pct DESC
@@ -1471,8 +1488,8 @@ FALLBACK_QUERIES = {
                 COUNT(DISTINCT d.match_id)    AS matches,
                 ROUND(SUM(d.runs_batter) * 100.0
                       / NULLIF(COUNT(*), 0), 2) AS strike_rate
-            FROM "deliveries" d
-            JOIN "players" p ON d.batter_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.batter_id = p.player_id
             GROUP BY p.player_name
             ORDER BY total_runs DESC
             LIMIT 10
@@ -1489,8 +1506,8 @@ FALLBACK_QUERIES = {
                     AND d.dismissal_type NOT IN
                     ('run out','retired hurt','obstructing the field')) AS wickets,
                 COUNT(DISTINCT d.match_id)                             AS matches
-            FROM "deliveries" d
-            JOIN "players" p ON d.bowler_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.bowler_id = p.player_id
             GROUP BY p.player_name
             ORDER BY wickets DESC
             LIMIT 10
@@ -1503,7 +1520,7 @@ FALLBACK_QUERIES = {
         "sql": """
             SELECT winner AS team,
                    COUNT(*) AS wins
-            FROM "matches"
+            FROM "Matches"
             WHERE winner IS NOT NULL
               AND result != 'no result'
             GROUP BY winner
@@ -1519,8 +1536,8 @@ FALLBACK_QUERIES = {
             SELECT m.season,
                    SUM(d.runs_total)          AS total_runs,
                    COUNT(DISTINCT d.match_id) AS matches
-            FROM "deliveries" d
-            JOIN "matches" m ON d.match_id = m.match_id
+            FROM deliveries d
+            JOIN "Matches" m ON d.match_id = m.match_id
             GROUP BY m.season
             ORDER BY m.season
         """,
@@ -1532,8 +1549,8 @@ FALLBACK_QUERIES = {
         "sql": """
             SELECT m.season, i.batting_team,
                    i.total_runs, i.total_wickets, m.match_venue
-            FROM "innings" i
-            JOIN "matches" m ON i.match_id = m.match_id
+            FROM innings i
+            JOIN "Matches" m ON i.match_id = m.match_id
             ORDER BY i.total_runs DESC
             LIMIT 10
         """,
@@ -1545,8 +1562,8 @@ FALLBACK_QUERIES = {
         "sql": """
             SELECT p.player_name,
                    COUNT(*) FILTER (WHERE d.runs_batter = 6) AS sixes
-            FROM "deliveries" d
-            JOIN "players" p ON d.batter_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.batter_id = p.player_id
             GROUP BY p.player_name
             ORDER BY sixes DESC
             LIMIT 10
@@ -1559,8 +1576,8 @@ FALLBACK_QUERIES = {
         "sql": """
             SELECT p.player_name,
                    COUNT(*) FILTER (WHERE d.runs_batter = 4) AS fours
-            FROM "deliveries" d
-            JOIN "players" p ON d.batter_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.batter_id = p.player_id
             GROUP BY p.player_name
             ORDER BY fours DESC
             LIMIT 10
@@ -1577,7 +1594,7 @@ FALLBACK_QUERIES = {
                 COUNT(*) FILTER (WHERE toss_winner = winner)                 AS wins_after_toss,
                 ROUND(100.0 * COUNT(*) FILTER (WHERE toss_winner = winner)
                       / NULLIF(COUNT(*), 0), 1)                              AS win_pct
-            FROM "matches"
+            FROM "Matches"
             WHERE result != 'no result'
               AND winner IS NOT NULL
             GROUP BY toss_decision
@@ -1593,7 +1610,7 @@ FALLBACK_QUERIES = {
                 REPLACE(REPLACE(player_of_match, '{"', ''), '"}', '')
                                   AS player,
                 COUNT(*)          AS awards
-            FROM "matches"
+            FROM "Matches"
             WHERE player_of_match IS NOT NULL
             GROUP BY player_of_match
             ORDER BY awards DESC
@@ -1606,7 +1623,7 @@ FALLBACK_QUERIES = {
     "season": {
         "sql": """
             SELECT season, COUNT(*) AS matches
-            FROM "matches"
+            FROM "Matches"
             GROUP BY season
             ORDER BY season
         """,
@@ -1620,8 +1637,8 @@ FALLBACK_QUERIES = {
                 p.player_name,
                 ROUND(SUM(d.runs_total) * 6.0 / NULLIF(COUNT(*), 0), 2) AS economy_rate,
                 COUNT(DISTINCT d.match_id)                                AS matches
-            FROM "deliveries" d
-            JOIN "players" p ON d.bowler_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.bowler_id = p.player_id
             GROUP BY p.player_name
             HAVING COUNT(DISTINCT d.match_id) >= 10
             ORDER BY economy_rate ASC
@@ -1637,8 +1654,8 @@ FALLBACK_QUERIES = {
                 p.player_name,
                 ROUND(SUM(d.runs_batter) * 100.0 / NULLIF(COUNT(*), 0), 2) AS strike_rate,
                 SUM(d.runs_batter)                                           AS total_runs
-            FROM "deliveries" d
-            JOIN "players" p ON d.batter_id = p.player_id
+            FROM deliveries d
+            JOIN "Players" p ON d.batter_id = p.player_id
             GROUP BY p.player_name
             HAVING SUM(d.runs_batter) >= 500
             ORDER BY strike_rate DESC
