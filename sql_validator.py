@@ -22,21 +22,29 @@ Returns { validated_sql, status, explanation }
 import os
 import re
 import json
+import streamlit as st
 from groq import Groq
 
-# ── Reuse same API key as sql_generator ──────────────────────────────────────
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "YOUR_GROQ_API_KEY_HERE")
-GROQ_MODEL   = "llama3-70b-8192"
 
-# ── Lazy client ───────────────────────────────────────────────────────────────
+def _get_groq_key() -> str:
+    """Load Groq API key from st.secrets or environment variable."""
+    try:
+        return st.secrets["GROQ_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        pass
+    return os.getenv("GROQ_API_KEY", "")
+
+
+GROQ_MODEL = "llama3-70b-8192"
+
 _client = None
 
 def _get_client():
     global _client
     if _client is not None:
         return _client
-    key = GROQ_API_KEY.strip()
-    if not key or key == "YOUR_GROQ_API_KEY_HERE":
+    key = _get_groq_key().strip()
+    if not key:
         return None
     try:
         _client = Groq(api_key=key)
@@ -71,7 +79,7 @@ Return a corrected SQL query.
 
 DATABASE SCHEMA (for reference):
 
-matches(
+"Matches"(
     match_id, season, match_date, match_city, match_venue,
     toss_winner, toss_decision, match_type,
     team1, team2, player_of_match, balls_per_over, overs,
@@ -94,7 +102,7 @@ deliveries(
     is_wicket, dismissal_type, player_out_id
 )
 
-players(player_id, player_name, registry_id)
+"Players"(player_id, player_name, registry_id)
 
 player_teams(player_id, team_name, season)
 

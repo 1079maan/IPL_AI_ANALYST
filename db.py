@@ -43,7 +43,7 @@ def _get_db_config() -> dict:
         "password": os.getenv("PG_PASSWORD", "Vaishnani@2728"),
         "sslmode":  "require",
     }
-# wsdsad
+
 
 # ── Connection pool ────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
@@ -107,6 +107,7 @@ def test_connection() -> bool:
 # ── Schema context sent to Groq LLM ───────────────────────────────────────────
 SCHEMA_CONTEXT = """
 PostgreSQL database: postgres (Supabase)
+EXACT table names: "Matches" (capital M), "Players" (capital P), deliveries, innings, player_teams
 Tables and columns:
 
 matches(
