@@ -606,15 +606,8 @@ def render_message(msg: dict):
     # ── Error ─────────────────────────────────────────────────────────────────
     if msg.get("error"):
         err = msg["error"]
-        if "connect" in err.lower() or "connection" in err.lower():
-            friendly = "Unable to connect to the database. Please check your PostgreSQL connection."
-        elif "column" in err.lower() or "relation" in err.lower():
-            friendly = "The query referenced an invalid column. Please try rephrasing."
-        elif "syntax" in err.lower():
-            friendly = "There was a SQL syntax issue. Please try rephrasing your question."
-        else:
-            friendly = "Something went wrong. Please try a different question."
-        st.markdown(f'<div class="err-box">⚠️ &nbsp;{friendly}</div>',
+        # Show real error for debugging — helps identify exact Supabase issue
+        st.markdown(f'<div class="err-box">⚠️ &nbsp;{err}</div>',
                     unsafe_allow_html=True)
 
     # ── Results table ─────────────────────────────────────────────────────────

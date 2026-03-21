@@ -324,7 +324,7 @@ FALLBACK_QUERIES = {
                 ROUND(100.0 * COUNT(*) FILTER (WHERE i.batting_team = m.winner)
                       / NULLIF(COUNT(*), 0), 1)                      AS win_pct
             FROM innings i
-            JOIN "Matches" m ON i.match_id = m.match_id
+            JOIN "Matches" m ON i.match_id::integer = m.match_id::integer
             WHERE m.winner IS NOT NULL
               AND m.result != 'no result'
             GROUP BY i.innings_number
@@ -342,7 +342,7 @@ FALLBACK_QUERIES = {
                 COUNT(*)                              AS matches,
                 MAX(i.total_runs)                     AS highest_score
             FROM innings i
-            JOIN "Matches" m ON i.match_id = m.match_id
+            JOIN "Matches" m ON i.match_id::integer = m.match_id::integer
             WHERE i.innings_number = 1
             GROUP BY m.match_venue
             HAVING COUNT(*) >= 5
@@ -436,7 +436,7 @@ FALLBACK_QUERIES = {
                 ROUND(100.0 * COUNT(*) FILTER (WHERE i.batting_team = m.winner)
                       / NULLIF(COUNT(*), 0), 1)                        AS win_pct
             FROM innings i
-            JOIN "Matches" m ON i.match_id = m.match_id
+            JOIN "Matches" m ON i.match_id::integer = m.match_id::integer
             WHERE i.innings_number = 1
               AND m.winner IS NOT NULL
               AND m.result != 'no result'
@@ -456,7 +456,7 @@ FALLBACK_QUERIES = {
                 MIN(i.total_runs)              AS lowest_score,
                 COUNT(*)                       AS matches
             FROM innings i
-            JOIN "Matches" m ON i.match_id = m.match_id
+            JOIN "Matches" m ON i.match_id::integer = m.match_id::integer
             WHERE i.innings_number = 1
             GROUP BY m.season
             ORDER BY m.season
@@ -474,7 +474,7 @@ FALLBACK_QUERIES = {
                 ROUND(100.0 * COUNT(*) FILTER (WHERE d.runs_total = 0)
                       / NULLIF(COUNT(*), 0), 1)                        AS dot_ball_pct
             FROM deliveries d
-            JOIN "Players" p ON d.bowler_id = p.player_id
+            JOIN "Players" p ON d.bowler_id::integer = p.player_id::integer
             GROUP BY p.player_name
             HAVING COUNT(*) >= 300
             ORDER BY dot_ball_pct DESC
@@ -494,7 +494,7 @@ FALLBACK_QUERIES = {
                 ROUND(SUM(d.runs_batter) * 100.0
                       / NULLIF(COUNT(*), 0), 2) AS strike_rate
             FROM deliveries d
-            JOIN "Players" p ON d.batter_id = p.player_id
+            JOIN "Players" p ON d.batter_id::integer = p.player_id::integer
             GROUP BY p.player_name
             ORDER BY total_runs DESC
             LIMIT 10
@@ -512,7 +512,7 @@ FALLBACK_QUERIES = {
                     ('run out','retired hurt','obstructing the field')) AS wickets,
                 COUNT(DISTINCT d.match_id)                             AS matches
             FROM deliveries d
-            JOIN "Players" p ON d.bowler_id = p.player_id
+            JOIN "Players" p ON d.bowler_id::integer = p.player_id::integer
             GROUP BY p.player_name
             ORDER BY wickets DESC
             LIMIT 10
@@ -542,7 +542,7 @@ FALLBACK_QUERIES = {
                    SUM(d.runs_total)          AS total_runs,
                    COUNT(DISTINCT d.match_id) AS matches
             FROM deliveries d
-            JOIN "Matches" m ON d.match_id = m.match_id
+            JOIN "Matches" m ON d.match_id::integer = m.match_id::integer
             GROUP BY m.season
             ORDER BY m.season
         """,
@@ -555,7 +555,7 @@ FALLBACK_QUERIES = {
             SELECT m.season, i.batting_team,
                    i.total_runs, i.total_wickets, m.match_venue
             FROM innings i
-            JOIN "Matches" m ON i.match_id = m.match_id
+            JOIN "Matches" m ON i.match_id::integer = m.match_id::integer
             ORDER BY i.total_runs DESC
             LIMIT 10
         """,
@@ -568,7 +568,7 @@ FALLBACK_QUERIES = {
             SELECT p.player_name,
                    COUNT(*) FILTER (WHERE d.runs_batter = 6) AS sixes
             FROM deliveries d
-            JOIN "Players" p ON d.batter_id = p.player_id
+            JOIN "Players" p ON d.batter_id::integer = p.player_id::integer
             GROUP BY p.player_name
             ORDER BY sixes DESC
             LIMIT 10
@@ -582,7 +582,7 @@ FALLBACK_QUERIES = {
             SELECT p.player_name,
                    COUNT(*) FILTER (WHERE d.runs_batter = 4) AS fours
             FROM deliveries d
-            JOIN "Players" p ON d.batter_id = p.player_id
+            JOIN "Players" p ON d.batter_id::integer = p.player_id::integer
             GROUP BY p.player_name
             ORDER BY fours DESC
             LIMIT 10
@@ -643,7 +643,7 @@ FALLBACK_QUERIES = {
                 ROUND(SUM(d.runs_total) * 6.0 / NULLIF(COUNT(*), 0), 2) AS economy_rate,
                 COUNT(DISTINCT d.match_id)                                AS matches
             FROM deliveries d
-            JOIN "Players" p ON d.bowler_id = p.player_id
+            JOIN "Players" p ON d.bowler_id::integer = p.player_id::integer
             GROUP BY p.player_name
             HAVING COUNT(DISTINCT d.match_id) >= 10
             ORDER BY economy_rate ASC
@@ -660,7 +660,7 @@ FALLBACK_QUERIES = {
                 ROUND(SUM(d.runs_batter) * 100.0 / NULLIF(COUNT(*), 0), 2) AS strike_rate,
                 SUM(d.runs_batter)                                           AS total_runs
             FROM deliveries d
-            JOIN "Players" p ON d.batter_id = p.player_id
+            JOIN "Players" p ON d.batter_id::integer = p.player_id::integer
             GROUP BY p.player_name
             HAVING SUM(d.runs_batter) >= 500
             ORDER BY strike_rate DESC
