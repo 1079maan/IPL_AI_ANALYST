@@ -738,7 +738,6 @@
 # if q := st.chat_input("Ask anything about IPL cricket…"):
 #     process_question(q)
 
-
 import streamlit as st
 import psycopg2
 from groq import Groq
