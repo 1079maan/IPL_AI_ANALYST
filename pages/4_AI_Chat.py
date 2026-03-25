@@ -746,8 +746,6 @@ import google.generativeai as genai
 import re
 import pandas as pd
 
-from IPL_analyst_project.style import GLOBAL_CSS, sidebar_html, sidebar_nav
-
 # ─────────────────────────────────────────────
 #  PAGE CONFIG
 # ─────────────────────────────────────────────
