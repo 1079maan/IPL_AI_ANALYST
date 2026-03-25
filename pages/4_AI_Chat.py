@@ -741,7 +741,7 @@
 
 import streamlit as st
 import psycopg2
-import google.generativeai as genai
+from groq import Groq
 import re
 import pandas as pd
 
@@ -968,16 +968,27 @@ def run_query(sql: str):
 
 
 # ─────────────────────────────────────────────
-#  GEMINI SETUP
+#  GROQ SETUP
 # ─────────────────────────────────────────────
+GROQ_MODEL = "llama3-70b-8192"
+
 @st.cache_resource
-def get_gemini_model():
-    genai.configure(api_key=st.secrets["gemini"]["api_key"])
-    return genai.GenerativeModel("gemini-2.0-flash")
+def get_groq_client():
+    return Groq(api_key=st.secrets["groq"]["api_key"])
+
+def groq_chat(client, prompt: str) -> str:
+    """Single Groq API call — returns text response."""
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.1,
+        max_tokens=1024,
+    )
+    return response.choices[0].message.content.strip()
 
 
 # ─────────────────────────────────────────────
-#  SINGLE COMBINED PROMPT  (1 Gemini call only)
+#  SINGLE COMBINED PROMPT  (1 Groq call only)
 # ─────────────────────────────────────────────
 COMBINED_PROMPT = """
 You are an expert IPL cricket data analyst AND a friendly chatbot assistant.
@@ -1027,23 +1038,23 @@ User question: {question}
 
 
 # ─────────────────────────────────────────────
-#  CORE CHATBOT LOGIC  (1 Gemini call)
+#  CORE CHATBOT LOGIC  (1 Groq call)
 # ─────────────────────────────────────────────
 def extract_sql(text: str) -> str:
-    """Clean up SQL returned by Gemini."""
+    """Clean up SQL returned by Groq."""
     text = text.strip()
     text = re.sub(r"```sql|```", "", text, flags=re.IGNORECASE).strip()
     return text
 
 
-def answer_question(question: str, model) -> tuple:
+def answer_question(question: str, client) -> tuple:
     """
-    Single Gemini call flow:
-    Step 1 → Ask Gemini: give me SQL or FALLBACK
-    Step 2 → If SQL: run on DB, then ask Gemini to convert result → ANSWER
+    Single Groq call flow:
+    Step 1 → Ask Groq: give me SQL or FALLBACK
+    Step 2 → If SQL: run on DB, then ask Groq to convert result → ANSWER
              If FALLBACK: return friendly message directly (NO second call)
     Total: 1 call for out-of-scope, 2 calls only for valid DB questions
-    But Step 2 call is very small (just result conversion) — saves ~60% tokens
+    Step 2 call is very small (just result conversion) — saves ~60% tokens
     """
     try:
         # ── STEP 1: Get SQL or FALLBACK (1 call) ──
@@ -1051,8 +1062,7 @@ def answer_question(question: str, model) -> tuple:
             question=question,
             result_section=""
         )
-        response1 = model.generate_content(prompt_step1)
-        reply1 = response1.text.strip()
+        reply1 = groq_chat(client, prompt_step1)
 
         # ── FALLBACK path (no DB call, no 2nd Gemini call) ──
         if reply1.startswith("FALLBACK:"):
@@ -1084,8 +1094,7 @@ def answer_question(question: str, model) -> tuple:
                 question=question,
                 result_section=f"\nDatabase result:\n{result_str}\nNow write the ANSWER:"
             )
-            response2 = model.generate_content(prompt_step2)
-            reply2 = response2.text.strip()
+            reply2 = groq_chat(client, prompt_step2)
 
             if reply2.startswith("ANSWER:"):
                 answer = reply2[len("ANSWER:"):].strip()
@@ -1102,8 +1111,8 @@ def answer_question(question: str, model) -> tuple:
         error_msg = str(e).lower()
         if "syntax" in error_msg or "column" in error_msg or "relation" in error_msg:
             return "🏏 That question is a bit complex for my current data. Try asking something simpler like 'Who scored the most runs in IPL 2023?'", None
-        if "429" in str(e) or "quota" in error_msg:
-            return "⏳ Gemini API quota exceeded. Please wait a minute and try again!", None
+        if "429" in str(e) or "quota" in error_msg or "rate_limit" in error_msg:
+            return "⏳ Groq API rate limit hit. Please wait a few seconds and try again!", None
         return f"⚠️ Something went wrong: {e}", None
 
 
@@ -1124,7 +1133,7 @@ if "pending_question" not in st.session_state:
 st.markdown("""
 <div class="chat-header">
     <h1>🏏 IPL AI CHATBOT</h1>
-    <p>Powered by Gemini AI · Supabase PostgreSQL · All IPL Seasons</p>
+    <p>Powered by Groq LLaMA3 · Supabase PostgreSQL · All IPL Seasons</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1171,7 +1180,7 @@ if not st.session_state.messages:
     <div class="msg-wrapper">
         <div class="avatar bot">🤖</div>
         <div class="bubble bot">
-👋 Hey! I'm your IPL AI Analyst — powered by Gemini AI and your personal IPL dataset!
+👋 Hey! I'm your IPL AI Analyst — powered by Groq LLaMA3 and your personal IPL dataset!
 
 I can answer questions about:
 🏏 Match results & winners across all seasons
@@ -1245,10 +1254,10 @@ if question:
     # Show thinking
     with st.spinner("🔍 Analyzing your question..."):
         try:
-            model = get_gemini_model()
-            answer, df = answer_question(question, model)
+            client = get_groq_client()
+            answer, df = answer_question(question, client)
         except Exception as e:
-            answer = f"⚠️ Error initializing Gemini: {e}"
+            answer = f"⚠️ Error initializing Groq: {e}"
             df = None
 
     # Add bot message
