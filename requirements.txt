@@ -20,7 +20,3 @@ plotly>=5.20.0
 
 # Environment config
 python-dotenv>=1.0.0
-
-
-google-generativeai
-psycopg2-binary

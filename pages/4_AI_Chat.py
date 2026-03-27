@@ -969,7 +969,7 @@ def run_query(sql: str):
 # ─────────────────────────────────────────────
 #  GROQ SETUP
 # ─────────────────────────────────────────────
-GROQ_MODEL = "llama3-70b-8192"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 @st.cache_resource
 def get_groq_client():
