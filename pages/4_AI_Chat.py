@@ -1108,11 +1108,9 @@ def answer_question(question: str, client) -> tuple:
 
     except Exception as e:
         error_msg = str(e).lower()
-        if "syntax" in error_msg or "column" in error_msg or "relation" in error_msg:
-            return "🏏 That question is a bit complex for my current data. Try asking something simpler like 'Who scored the most runs in IPL 2023?'", None
         if "429" in str(e) or "quota" in error_msg or "rate_limit" in error_msg:
             return "⏳ Groq API rate limit hit. Please wait a few seconds and try again!", None
-        return f"⚠️ Something went wrong: {e}", None
+        return f"⚠️ Real error: {e}", None
 
 
 # ─────────────────────────────────────────────
