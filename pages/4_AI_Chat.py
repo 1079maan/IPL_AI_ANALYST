@@ -935,35 +935,6 @@ html, body, [class*="css"] {
 </style>
 """, unsafe_allow_html=True)
 
-def render_cant_answer(question: str):
-    """
-    Professional friendly card shown when model cannot find an answer.
-    Tells user exactly why + what they CAN ask instead.
-    """
-    st.markdown(f"""
-    <div class="cant-answer">
-        <div class="cant-title">🤔 &nbsp; Cannot Find Answer</div>
-        <div class="cant-body">
-            I could not find an answer for <b>"{question}"</b> in the IPL dataset.<br>
-            This may be because:
-            <br>• The data for this question is <b>not recorded</b> in the dataset
-            <br>• The question needs data from <b>outside cricket statistics</b>
-            <br>• Try rephrasing your question more specifically
-        </div>
-        <div class="cant-suggest">
-            <b>✅ Questions I CAN answer:</b><br>
-            🏏 &nbsp;Top 10 batsmen all time &nbsp;|&nbsp;
-            🎯 &nbsp;Top wicket takers &nbsp;|&nbsp;
-            🏆 &nbsp;Which team has most wins<br>
-            📈 &nbsp;Runs per season trend &nbsp;|&nbsp;
-            💥 &nbsp;Most sixes in IPL &nbsp;|&nbsp;
-            🪙 &nbsp;Toss impact on results<br>
-            🏟️ &nbsp;Highest average score venue &nbsp;|&nbsp;
-            ⭐ &nbsp;Player of match awards &nbsp;|&nbsp;
-            🎳 &nbsp;Best economy bowlers
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 #  DB CONNECTION  (Supabase PostgreSQL)
