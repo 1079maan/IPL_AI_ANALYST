@@ -1240,25 +1240,25 @@ with st.sidebar:
         st.rerun()
 
     # ── System Info ──
-    st.markdown("""
-    <div style="margin-top:1rem;padding:0.7rem;
-                background:rgba(0,245,255,0.04);
-                border:1px solid rgba(0,245,255,0.15);
-                border-radius:8px;">
-        <div style="font-family:'Orbitron',monospace;font-size:0.58rem;
-                    letter-spacing:2px;text-transform:uppercase;
-                    color:rgba(0,245,255,0.5);margin-bottom:0.5rem;">
-            SYSTEM INFO
-        </div>
-        <div style="font-family:'Rajdhani',sans-serif;font-size:0.78rem;
-                    color:rgba(255,255,255,0.5);line-height:2;">
-            🤖 Groq · LLaMA3-70B<br>
-            🗄️ Supabase PostgreSQL<br>
-            ⚡ IPL 2008 – 2024<br>
-            📊 5 Tables · Live Data
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # st.markdown("""
+    # <div style="margin-top:1rem;padding:0.7rem;
+    #             background:rgba(0,245,255,0.04);
+    #             border:1px solid rgba(0,245,255,0.15);
+    #             border-radius:8px;">
+    #     <div style="font-family:'Orbitron',monospace;font-size:0.58rem;
+    #                 letter-spacing:2px;text-transform:uppercase;
+    #                 color:rgba(0,245,255,0.5);margin-bottom:0.5rem;">
+    #         SYSTEM INFO
+    #     </div>
+    #     <div style="font-family:'Rajdhani',sans-serif;font-size:0.78rem;
+    #                 color:rgba(255,255,255,0.5);line-height:2;">
+    #         🤖 Groq · LLaMA3-70B<br>
+    #         🗄️ Supabase PostgreSQL<br>
+    #         ⚡ IPL 2008 – 2024<br>
+    #         📊 5 Tables · Live Data
+    #     </div>
+    # </div>
+    # """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────
