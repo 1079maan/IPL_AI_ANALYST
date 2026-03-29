@@ -1230,7 +1230,7 @@ with st.sidebar:
                 key=f"sidebar_faq_{level}_{idx}",
                 use_container_width=True,
             ):
-                st.session_state.pending_question = faq["q"]
+                st.session_state.pending_question = faq["label"]
 
     # ── Divider ──
     st.markdown('<hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,#00f5ff,transparent);opacity:0.3;margin:1rem 0;">', unsafe_allow_html=True)
