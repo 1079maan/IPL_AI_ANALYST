@@ -1270,7 +1270,7 @@ if not st.session_state.messages:
     <div class="msg-wrapper">
         <div class="avatar bot">🤖</div>
         <div class="bubble bot">
-👋 Hey! I'm <b>IPL NEXUS AI</b> — your personal IPL cricket analyst!
+👋 Hey! I'm <b>IPL AI Analyst</b> — your personal IPL cricket analyst!
 
 I can answer questions about:
 🏏 Match results &amp; winners
