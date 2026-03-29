@@ -1217,7 +1217,7 @@ with st.sidebar:
         "🔴 Hard":   "#ff6b35",
     }
     for level, faqs in FAQ_QUESTIONS.items():
-        color = level_colors[level]
+        color = level_colors.get(level, "#00f5ff")
         st.markdown(
             f'<div style="font-family:Rajdhani,sans-serif;font-size:0.72rem;'
             f'font-weight:600;letter-spacing:1px;color:{color};'
