@@ -1157,25 +1157,25 @@ st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 #  SUGGESTION CHIPS
 # ─────────────────────────────────────────────
-suggestions = [
-    "Most sixes in IPL 2024",
-    "Top 5 run scorers overall",
-    "Who won IPL 2023?",
-    "Best bowling economy",
-    "Highest team total ever",
-    "Most Player of Match awards",
-]
+# suggestions = [
+#     "Most sixes in IPL 2024",
+#     "Top 5 run scorers overall",
+#     "Who won IPL 2023?",
+#     "Best bowling economy",
+#     "Highest team total ever",
+#     "Most Player of Match awards",
+# ]
 
-st.markdown('<div class="chip-row">' +
-    "".join(f'<span class="chip" onclick="void(0)">⚡ {s}</span>' for s in suggestions) +
-'</div>', unsafe_allow_html=True)
+# st.markdown('<div class="chip-row">' +
+#     "".join(f'<span class="chip" onclick="void(0)">⚡ {s}</span>' for s in suggestions) +
+# '</div>', unsafe_allow_html=True)
 
 # Streamlit buttons for chips (functional)
-chip_cols = st.columns(len(suggestions))
-for i, sug in enumerate(suggestions):
-    with chip_cols[i]:
-        if st.button(sug, key=f"chip_{i}"):
-            st.session_state.pending_question = sug
+# chip_cols = st.columns(len(suggestions))
+# for i, sug in enumerate(suggestions):
+#     with chip_cols[i]:
+#         if st.button(sug, key=f"chip_{i}"):
+#             st.session_state.pending_question = sug
 
 
 # ─────────────────────────────────────────────
