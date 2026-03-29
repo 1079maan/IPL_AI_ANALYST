@@ -765,60 +765,6 @@ with st.sidebar:
 
 
 # ─────────────────────────────────────────────
-#  FAQ QUESTIONS — Easy to Hard (15 questions)
-# ─────────────────────────────────────────────
-FAQ_QUESTIONS = {
-    "🟢 Easy": [
-        {"emoji": "🏆", "label": "IPL 2023 Winner",      "q": "Which team won IPL 2023?"},
-        {"emoji": "🔢", "label": "Matches in 2023",       "q": "How many total matches were played in IPL 2023?"},
-        {"emoji": "👥", "label": "Total Players",          "q": "How many players are registered in the IPL dataset?"},
-        {"emoji": "📍", "label": "Top Host City",          "q": "Which city hosted the most IPL matches?"},
-        {"emoji": "📅", "label": "Matches Per Season",     "q": "How many matches were played in each IPL season?"},
-    ],
-    "🟡 Medium": [
-        {"emoji": "🥇", "label": "Most Winning Team",     "q": "Which team won the most matches in IPL history?"},
-        {"emoji": "⭐", "label": "Player of Match",        "q": "Who won the most Player of the Match awards?"},
-        {"emoji": "💥", "label": "Highest Team Total",    "q": "What is the highest total runs scored by a team in a single innings?"},
-        {"emoji": "🏟️", "label": "Top Venue",              "q": "Which venue hosted the most IPL matches?"},
-        {"emoji": "🎯", "label": "Most Wickets Ever",     "q": "Which bowler took the most wickets across all IPL seasons?"},
-    ],
-    "🔴 Hard": [
-        {"emoji": "📊", "label": "Top 5 Run Scorers",     "q": "Who are the top 5 run scorers across all IPL seasons?"},
-        {"emoji": "6️⃣",  "label": "Sixes in IPL 2024",    "q": "How many sixes were hit in IPL 2024?"},
-        {"emoji": "🏏",  "label": "Batting First Wins",   "q": "How many matches were won by teams batting first across all seasons?"},
-        {"emoji": "🎳",  "label": "Best Season Wickets",  "q": "Who took the most wickets in a single IPL season?"},
-        {"emoji": "🔵",  "label": "MI Wins 2023",         "q": "How many matches did Mumbai Indians win in IPL 2023?"},
-    ],
-}
- 
-# ── FAQ Header ──
-st.markdown("""
-<div style="font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:700;
-            letter-spacing:2px;text-transform:uppercase;
-            color:rgba(0,245,255,0.7);margin:0.2rem 0 0.8rem;">
-    ⚡ FREQUENTLY ASKED QUESTIONS
-</div>
-""", unsafe_allow_html=True)
- 
-# ── Render FAQ rows ──
-for level, faqs in FAQ_QUESTIONS.items():
-    st.markdown(
-        f'<div style="font-family:Rajdhani,sans-serif;font-size:0.78rem;'
-        f'color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:0.3rem;">'
-        f'{level}</div>',
-        unsafe_allow_html=True,
-    )
-    cols = st.columns(5)
-    for idx, faq in enumerate(faqs):
-        with cols[idx]:
-            if st.button(
-                f"{faq['emoji']} {faq['label']}",
-                key=f"faq_{level}_{idx}",
-                use_container_width=True,
-            ):
-                st.session_state.pending_question = faq["q"]
- 
-# ─────────────────────────────────────────────
 #  NEON CYBERPUNK STYLES  (matches IPL NEXUS theme)
 # ─────────────────────────────────────────────
 st.markdown("""
