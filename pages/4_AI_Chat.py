@@ -1153,14 +1153,14 @@ st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 #  FAQ QUESTIONS — Easy to Hard (15 questions)
 # ─────────────────────────────────────────────
 FAQ_QUESTIONS = {
-    "🟢 Easy": [
+    "": [
         {"emoji": "🏆", "label": "How many total matches were played in IPL history?"},
         {"emoji": "🔢", "label": "Which team played the most matches in IPL?"},
         {"emoji": "👥", "label": "How many seasons are there in the IPL dataset?"},
         {"emoji": "📍", "label": "Which match venue is most popular in IPL?"},
         {"emoji": "📅", "label": "How many total wickets fell in IPL 2023?"},
     ],
-    "🟡 Medium": [
+    "": [
         {"emoji": "🥇", "label": "Which team won the most matches when batting first?"},
         {"emoji": "⭐", "label": "How many matches did Mumbai Indians win in IPL 2023?"},
         {"emoji": "💥", "label": "What is the highest total runs scored by a team in a single innings?"},
@@ -1168,7 +1168,7 @@ FAQ_QUESTIONS = {
         {"emoji": "🎯", "label": "Which team scored the highest total runs in a single IPL season?"},
         {"emoji": "🎯", "label": "How many total extras were bowled in all IPL matches?"},
     ],
-    "🔴 Hard": [
+    "": [
         {"emoji": "📊", "label": "Who are the top 5 run scorers across all IPL seasons?"},
         {"emoji": "6️⃣", "label": "Which IPL team scored the most sixes across all seasons?"},
         {"emoji": "🏏", "label": "How many matches were won by teams batting first across all seasons?"},
@@ -1270,16 +1270,30 @@ if not st.session_state.messages:
     <div class="msg-wrapper">
         <div class="avatar bot">🤖</div>
         <div class="bubble bot">
-👋 Hey! I'm your IPL AI Analyst — powered by Groq LLaMA3 and your personal IPL dataset!
+👋 Welcome to IPL AI Analyst Chat!
+
+I am your personal IPL cricket analyst — powered by 
+Groq LLaMA3 and your live IPL dataset!
 
 I can answer questions about:
 🏏 Match results & winners across all seasons
-📊 Batting & bowling statistics
+📊 Batting & bowling statistics  
 🎯 Ball-by-ball delivery data
 🏆 Player of the Match records
 👥 Player teams per season
+🏟️ Venue & city statistics
+📅 Season-wise records & trends
 
-Just type your question below or click a suggestion above!
+💡 Tips to get best answers:
+- Ask specific questions like "IPL 2023" not just "IPL"
+- Use player full names like "Virat Kohli"
+- Use team full names like "Mumbai Indians"
+
+⚡ Click any Quick Question from the sidebar
+   or type your own question below!
+
+🟢 Easy → Medium 🟡 → Hard 🔴
+Start with easy questions first!
         </div>
     </div>
     """, unsafe_allow_html=True)
