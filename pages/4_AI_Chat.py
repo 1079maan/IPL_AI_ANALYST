@@ -738,6 +738,7 @@
 # if q := st.chat_input("Ask anything about IPL cricket…"):
 #     process_question(q)
 
+
 import streamlit as st
 import psycopg2
 from groq import Groq
@@ -754,6 +755,9 @@ st.set_page_config(
     page_icon="🏏",
     layout="wide",
 )
+
+st.set_page_config(page_title="IPL NEXUS · About", page_icon="◈", layout="wide")
+st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown(sidebar_html(), unsafe_allow_html=True)
