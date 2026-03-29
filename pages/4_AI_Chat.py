@@ -1270,30 +1270,16 @@ if not st.session_state.messages:
     <div class="msg-wrapper">
         <div class="avatar bot">🤖</div>
         <div class="bubble bot">
-👋 Welcome to IPL AI Analyst Chat!
-
-I am your personal IPL cricket analyst — powered by 
-Groq LLaMA3 and your live IPL dataset!
+👋 Hey! I'm your IPL AI Analyst — powered by Groq LLaMA3 and your personal IPL dataset!
 
 I can answer questions about:
 🏏 Match results & winners across all seasons
-📊 Batting & bowling statistics  
+📊 Batting & bowling statistics
 🎯 Ball-by-ball delivery data
 🏆 Player of the Match records
 👥 Player teams per season
-🏟️ Venue & city statistics
-📅 Season-wise records & trends
 
-💡 Tips to get best answers:
-- Ask specific questions like "IPL 2023" not just "IPL"
-- Use player full names like "Virat Kohli"
-- Use team full names like "Mumbai Indians"
-
-⚡ Click any Quick Question from the sidebar
-   or type your own question below!
-
-🟢 Easy → Medium 🟡 → Hard 🔴
-Start with easy questions first!
+Just type your question below or click a suggestion above!
         </div>
     </div>
     """, unsafe_allow_html=True)
